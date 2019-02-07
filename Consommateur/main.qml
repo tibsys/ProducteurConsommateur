@@ -21,7 +21,7 @@ Window {
 
     Timer {
         id: timerRefreshIndicators
-        interval: 500
+        interval: 100
         repeat: true
         onTriggered: {
             lblTramesRecues.text = consommateur.receivedFrames

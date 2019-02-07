@@ -18,6 +18,9 @@ Window {
         onConnectedToConsommateur: {
             currentState.state = "Started";
             timerRefreshIndicators.start()
+            seriesEffectiveRate.clear()
+            seriesMissed.clear()
+            seriesRate.clear()
         }
         onTraitementStoppe: {
             currentState.state = "Stopped"

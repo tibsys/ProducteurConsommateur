@@ -51,7 +51,7 @@ void ProducteurController::onClientConnected()
     //lastFrameSentAt_ = QDateTime::currentMSecsSinceEpoch();
     effectiveRate_ = 1;
     currentFrameId_ = 0;
-    framesStatus_.clear();
+    framesStatus_.clear();    
     QTimer::singleShot(0, this, SLOT(sendNewFrame()));
 }
 

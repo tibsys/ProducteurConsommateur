@@ -59,6 +59,7 @@ private slots:
     void onNewConnection();
     void onDataReceived();
     void onDataSent(qint64);
+    void traitementAsynchrone(int currentStep = 0);
     void reset() {
         nbReceivedFrames_ = 0;
         nbAckSent_ = 0;

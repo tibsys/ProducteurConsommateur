@@ -30,14 +30,10 @@ ConsommateurController::ConsommateurController(QObject *parent)
 {    
     connect(server_, &QTcpServer::newConnection, this, &ConsommateurController::onNewConnection);
 
-    //Initialise le consommateur de buffer
+    //Initialise le consommateur de buffer pour le mode Producteur-Consommateur
     connect(this, &QObject::destroyed, bufferConsumer_, &BufferConsumer::stop);
-    connect(bufferConsumer_, &BufferConsumer::traitementTermine, this, &ConsommateurController::sendAck);
-    //QThread *thread = new QThread(this);
-    connect(this, &QObject::destroyed, bufferConsumer_, &QThread::quit);
-    //connect(thread, &QThread::finished, bufferConsumer_, &BufferConsumer::deleteLater);
-    //bufferConsumer_->moveToThread(thread);
-    //bufferConsumer_->start();
+    connect(bufferConsumer_, &BufferConsumer::traitementTermine, this, &ConsommateurController::sendAck);    
+    connect(this, &QObject::destroyed, bufferConsumer_, &QThread::quit);    
 }
 
 ConsommateurController::ConsommateurController(const ConsommateurController &orig)
@@ -117,7 +113,7 @@ void ConsommateurController::onDataReceived()
             QThread::msleep(treatmentDurationInMillis_); //ATTENTION: très mauvaise pratique !
             sendAck();
         } else if(mode_ == Mode::ASYNCHRONE) {
-            QTimer::singleShot(treatmentDurationInMillis_, this, SLOT(sendAck()));
+            traitementAsynchrone();
         } else if(mode_ == Mode::PRODUCTEUR_CONSOMMATEUR) {
             buffer_ << data; //On stocke simplement les données
         }
@@ -131,4 +127,36 @@ void ConsommateurController::sendAck()
 
 void ConsommateurController::onDataSent(qint64) {
     nbAckSent_ += 1;
+}
+
+void ConsommateurController::traitementAsynchrone(int currentStep)
+{
+    //Le traitement asynchrone est un traitement découpé en
+    //plusieurs sous-traitements bloquants très peu de temps
+    //La fonction doit être réentrante...
+    //Nous allons simuler le nombre d'étapes en faisant boucler la
+    //fonction sur elle même de manière asynchrone par étapes de 20ms
+    //chacune maximum
+
+    if(treatmentDurationInMillis_ <= 20) { //Si la durée est inférieure à 50ms, on ne boucle pas
+        QThread::msleep(treatmentDurationInMillis_);
+        sendAck();
+        return;
+    }
+
+    //Calcul du nombre théorique d'itérations
+    double nbIterations = (treatmentDurationInMillis_/20.0);
+    //qDebug() << "nbIterations=" << nbIterations << ", currentStep=" << currentStep;
+
+    if(currentStep >= nbIterations) {
+        //on arrête
+        sendAck();
+        return;
+    } else {
+        //On fait le traitement
+        QThread::msleep(20);
+
+        //Puis on va à la prochaine itération en passant par la run-loop
+        QMetaObject::invokeMethod(this, "traitementAsynchrone", Qt::QueuedConnection, Q_ARG(int, currentStep+1));
+    }
 }
