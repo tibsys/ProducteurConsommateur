@@ -38,6 +38,8 @@ public:
         case Mode::ASYNCHRONE: return "asynchrone";
         case Mode::PRODUCTEUR_CONSOMMATEUR: return "producteur-consommateur";
         }
+
+        return "inconnu";
     }
 
     int treatmentDuration() const { return treatmentDurationInMillis_; }

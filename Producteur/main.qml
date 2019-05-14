@@ -14,6 +14,7 @@ Window {
     Producteur {
         id: producteur
         frameRate: slider.value
+        realTime: realTime.checked
         onConnectingToConsommateur: currentState.state = "Connecting";
         onConnectedToConsommateur: {
             currentState.state = "Started";
@@ -86,12 +87,12 @@ Window {
 
     Text {
         id: selectedRate
+        x: 20
         y: 70
+        width: 20
         horizontalAlignment: Text.AlignLeft
         anchors.left: slider.right
         anchors.leftMargin: 10
-        anchors.right: parent.right
-        anchors.rightMargin: 10
         font.pixelSize: 12
         text: slider.value
     }
@@ -262,6 +263,15 @@ Window {
         }
     }
 
+    CheckBox {
+        id: realTime
+        y: 51
+        text: qsTr("Temps réel")
+        anchors.verticalCenter: selectedRate.verticalCenter
+        anchors.left: selectedRate.right
+        anchors.leftMargin: 10
+    }
+
     Component.onCompleted: {
 
     }
@@ -321,9 +331,14 @@ Window {
 
 
 
+
+
+
+
 /*##^## Designer {
     D{i:1;anchors_x:25}D{i:2;anchors_y:57}D{i:3;anchors_x:98;anchors_y:44}D{i:4;anchors_x:304}
 D{i:6;anchors_x:152}D{i:7;anchors_x:219}D{i:8;anchors_height:200;anchors_width:200;anchors_x:31;anchors_y:120}
 D{i:17;anchors_x:117}D{i:19;anchors_height:200;anchors_width:200;anchors_x:786;anchors_y:230}
+D{i:25;anchors_x:541}
 }
  ##^##*/

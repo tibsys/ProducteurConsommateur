@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QTcpSocket>
+#include <QTimer>
 
 class ProducteurController : public QObject
 {
@@ -11,6 +12,7 @@ class ProducteurController : public QObject
     Q_PROPERTY(int sentFrames READ sentFrames)
     Q_PROPERTY(int missedFrames READ missedFrames)
     Q_PROPERTY(int effectiveRate READ effectiveFrameRate)
+    Q_PROPERTY(bool realTime READ realTime WRITE setRealTime NOTIFY contractChanged)
 
 public:
     explicit ProducteurController(QObject *parent = nullptr);
@@ -26,6 +28,11 @@ public:
     int effectiveFrameRate() const { return effectiveRate_; }
     int missedFrames() const;
     int sentFrames() const { return currentFrameId_; }
+    bool realTime() const { return realTime_; }
+    void setRealTime(const bool realTime) {
+        realTime_ = realTime;
+        qDebug() << "Contrat modifié";
+    }
 
     enum class FrameStatus {
         SENT,
@@ -39,6 +46,7 @@ signals:
     void traitementStoppe();
     void frameRateChanged(int);
     void frameSent();
+    void contractChanged();
 
 public slots:
     void connectToConsommateur();
@@ -50,6 +58,7 @@ private slots:
     void sendNewFrame();
     void onClientDataReceived();
     void onTraitementStoppe();
+    void onCommMonitor();
 
 private:
     QTcpSocket *client_ = nullptr;
@@ -60,7 +69,9 @@ private:
     int currentFrameId_ = 0;
     qint64 lastFrameSentAt_ = 0;
     int effectiveRate_ = 1;
-    //qint64 totalDuration_ = 0;
+    bool realTime_ = true;
+    QTimer commMonitor_;
+    bool mustDisconnect_ = false;
 };
 
 Q_DECLARE_METATYPE(ProducteurController)
